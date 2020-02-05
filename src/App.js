@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useState, useEffect} from 'react';
+import Users from "./components/users";
+import {listUsers} from "./api";
+import keyBy from 'lodash/keyBy';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default function App() {
+    const [users, setUsers] = useState({});
+    const fetchUsers = async () => {
+        const res = await listUsers();
+        console.log(res.data);
+        setUsers(res.data);
+    };
+    const cb = () => {
+        fetchUsers().then().catch();
+    };
+    useEffect(cb, [true]);
+    return (<div>
+        <Users fetchUsers={fetchUsers} users={users}/>
+    </div>);
 }
-
-export default App;
