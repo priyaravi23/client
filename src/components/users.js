@@ -1,10 +1,16 @@
 import React, {useState} from 'react';
+import uuid from 'uuid';
+
 import {createUser, deleteUser, updateUser} from "../api";
 import '../App.scss';
 
 export default function Users(props) {
 
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState({
+        id: uuid.v4(),
+        name: '',
+        address: ''
+    });
     const [edit, setEdit] = useState(false);
 
     const handleUserChange = e => {
@@ -17,16 +23,22 @@ export default function Users(props) {
 
     const saveUser = async e => {
         if (e.key === 'Enter') {
-            if (edit) {
-                const res = await updateUser(user);
-                console.log(res.data);
-                props.fetchUsers().then().catch();
-            } else {
-                const res = await createUser(user);
-                console.log(res.data);
-                props.fetchUsers().then().catch();
-            }
+            let res = edit ? await updateUser({
+                    ...user
+                }) : await createUser({
+                    ...user
+                });
+            console.log(res.data);
+            props.fetchUsers().then().catch();
+            setTimeout(() => {
+                setUser({
+                    id: uuid.v4(),
+                    name: '',
+                    value: ''
+                });
+            }, 100)
         }
+
     };
 
     const handleDeleteUser = async e => {
@@ -41,19 +53,18 @@ export default function Users(props) {
 
     const handleEditUser = async e => {
         try {
-            const id = e.currentTarget.dataset.id;
-            const editUser = await updateUser(id);
-            const res = await props.fetchUsers();
+            const {id} = e.currentTarget.dataset;
+            console.log(id);
             setEdit(true);
             setUser({
-                ...user[id]
+                ...props.users[id]
             });
         } catch (ex) {
             alert('Could not edit the user!');
         }
     };
 
-    const renderedUsers = Object.values(props.users).map(user => <div className="row">
+    const renderedUsers = Object.values(props.users).map(user => <div key={user.id} className="row">
         <div className="column">
             {user.name}
         </div>
@@ -73,17 +84,26 @@ export default function Users(props) {
         </button>
     </div>);
 
+    console.log(user, props.users);
     return (<div>
         <div className="table">
             <div className="table-body">
                 <div>
                     <div className="column">
                         Name:
-                        <input onKeyDown={saveUser} onChange={handleUserChange} value={user.name} type="text" data-prop="name"/>
+                        <input
+                            onKeyDown={saveUser}
+                            onChange={handleUserChange}
+                            value={user.name}
+                            type="text" data-prop="name"/>
                     </div>
                     <div className="column">
                         Address:
-                        <input onKeyDown={saveUser} onChange={handleUserChange} value={user.address} type="text" data-prop="address"/>
+                        <input
+                            onKeyDown={saveUser}
+                            onChange={handleUserChange}
+                            value={user.address}
+                            type="text" data-prop="address"/>
                     </div>
                 </div>
             </div>
