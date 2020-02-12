@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {createUser, deleteUser, updateUser} from "../api";
 import '../App.scss';
@@ -7,7 +7,7 @@ import '../App.scss';
 export default function Users(props) {
 
     const [user, setUser] = useState({
-        id: uuid.v4(),
+        id: uuidv4(),
         name: '',
         address: ''
     });
@@ -32,9 +32,9 @@ export default function Users(props) {
             props.fetchUsers().then().catch();
             setTimeout(() => {
                 setUser({
-                    id: uuid.v4(),
+                    id: uuidv4(),
                     name: '',
-                    value: ''
+                    address: ''
                 });
             }, 100)
         }
@@ -64,6 +64,22 @@ export default function Users(props) {
         }
     };
 
+    const handleSaveUserOnClick = async () => {
+      let res = edit ? await updateUser({
+          ...user
+      }) : await createUser({
+            ...user
+        });
+      console.log(res.data);
+      props.fetchUsers().then().catch();
+
+      setUser({
+          id: uuidv4(),
+          name: '',
+          address: ''
+      })
+    };
+
     const renderedUsers = Object.values(props.users).map(user => <div key={user.id} className="row">
         <div className="column">
             {user.name}
@@ -71,45 +87,59 @@ export default function Users(props) {
         <div className="column">
             {user.address}
         </div>
-        <button className="icon"
-                data-id={user.id}
-                onClick={handleEditUser}>
-            <i className="fa fa-edit"/>
-        </button>
 
-        <button className="icon"
-                data-id={user.id}
-                onClick={handleDeleteUser}>
-            <i className="fas fa-user-minus"/>
-        </button>
+        <div className="column">
+            <button className="icon"
+                    data-id={user.id}
+                    onClick={handleEditUser}>
+                <i className="fa fa-edit"/>
+            </button>
+
+            <button className="icon"
+                    data-id={user.id}
+                    onClick={handleDeleteUser}>
+                <i className="fas fa-user-minus"/>
+            </button>
+        </div>
     </div>);
 
     console.log(user, props.users);
     return (<div>
-        <div className="table">
-            <div className="table-body">
-                <div>
-                    <div className="column">
-                        Name:
-                        <input
-                            onKeyDown={saveUser}
-                            onChange={handleUserChange}
-                            value={user.name}
-                            type="text" data-prop="name"/>
-                    </div>
-                    <div className="column">
-                        Address:
-                        <input
-                            onKeyDown={saveUser}
-                            onChange={handleUserChange}
-                            value={user.address}
-                            type="text" data-prop="address"/>
-                    </div>
+        <form className='form'>
+            <fieldset>
+                <div className='field'>
+                    <label>Name: </label>
+                    <input
+                        onKeyDown={saveUser}
+                        onChange={handleUserChange}
+                        value={user.name}
+                        type="text" data-prop="name"/>
+                </div>
+
+                <div className='field'>
+                    <label>Address: </label>
+                    <input
+                        onKeyDown={saveUser}
+                        onChange={handleUserChange}
+                        value={user.address}
+                        type="text" data-prop="address"/>
+                </div>
+            </fieldset>
+
+            <button onClick={handleSaveUserOnClick}>
+                Submit
+            </button>
+        </form>
+
+        <div className='table'>
+            <div className="table-header">
+                <div className="row">
+                    <div className="column">Name</div>
+                    <div className="column">Address</div>
+                    <div className="column">Options</div>
                 </div>
             </div>
-        </div>
 
-        <div className="table">
             <div className="table-body">
                 {renderedUsers}
             </div>

@@ -8,7 +8,7 @@ export default function App() {
     const fetchUsers = async () => {
         const res = await listUsers();
         console.log(res.data);
-        setUsers(res.data);
+        setUsers(keyBy(res.data, 'id'));
     };
     const cb = () => {
         fetchUsers().then().catch();
